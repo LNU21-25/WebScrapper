@@ -1,35 +1,40 @@
-import { initializeTitle } from './modules/title.js'
-import { initializeQuiz } from './modules/quiz.js'
-import { initializeScores, updateLeaderboard } from './modules/scores.js'
+import { scrapeLinks } from './scraper/linkScraper.js'
+import { scrapeCalendar } from './scraper/calendarScraper.js'
+import { scrapeCinema } from './scraper/cinemaScraper.js'
+import { scrapeRestaurant } from './scraper/restaurantScraper.js'
+import { analyzeAndRecommend } from './utils/analyzeUtils.js'
 
-console.log('Initializing app...')
+/**
+ * Main entry point for the application.
+ * @param {string} startUrl - The starting URL for scraping.
+ */
+async function main (startUrl) {
+  console.log('Scraping links...')
+  const links = await scrapeLinks(startUrl)
+  console.log('Scraping links...OK')
 
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM fully loaded.')
+  console.log('Scraping available days...')
+  const availableDays = await scrapeCalendar(links.calendar)
+  console.log('Scraping available days...OK')
 
-  // Initialize sections
-  initializeTitle()
-  initializeQuiz()
-  initializeScores()
+  console.log('Scraping showtimes...')
+  const showtimes = await scrapeCinema(links.cinema, availableDays)
+  console.log('Scraping showtimes...OK')
 
-  // Add navbar scroll functionality
-  document.addEventListener('DOMContentLoaded', () => {
-    const navLinks = document.querySelectorAll('.nav-links a')
+  console.log('Scraping possible reservations...')
+  const reservations = await scrapeRestaurant(links.restaurant, availableDays)
+  console.log('Scraping possible reservations...OK')
 
-    navLinks.forEach(link => {
-      link.addEventListener('click', (event) => {
-        event.preventDefault() // Prevent default anchor behavior
+  console.log('\nRecommendations')
+  console.log('===============')
+  analyzeAndRecommend(availableDays, showtimes, reservations)
+}
 
-        const targetPage = event.target.getAttribute('data-page') // Get the data-page attribute
-        const targetSection = document.getElementById(targetPage)
+// Get the start URL from command line arguments
+const startUrl = process.argv[2]
+if (!startUrl) {
+  console.error('Please provide a start URL.')
+  process.exit(1)
+}
 
-        if (targetSection) {
-          targetSection.scrollIntoView({ behavior: 'smooth' })
-        } else {
-          console.error(`Section with id "${targetPage}" not found.`)
-        }
-      })
-    })
-  })
-  updateLeaderboard()
-})
+main(startUrl).catch(console.error)
