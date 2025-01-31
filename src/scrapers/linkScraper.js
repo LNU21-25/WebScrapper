@@ -7,16 +7,24 @@ import cheerio from 'cheerio'
  * @returns {object} - Links to the calendar, cinema, and restaurant pages.
  */
 export async function scrapeLinks (startUrl) {
-  const response = await axios.get(startUrl)
-  const $ = cheerio.load(response.data)
+  try {
+    // Fetch the HTML content of the starting page
+    const response = await axios.get(startUrl)
+    const $ = cheerio.load(response.data)
 
-  const calendarLink = $('a[href*="calendar"]').attr('href')
-  const cinemaLink = $('a[href*="cinema"]').attr('href')
-  const restaurantLink = $('a[href*="restaurant"]').attr('href')
+    // Extract links using cheerio
+    const calendarLink = $('a[href*="calendar"]').attr('href')
+    const cinemaLink = $('a[href*="cinema"]').attr('href')
+    const restaurantLink = $('a[href*="restaurant"]').attr('href')
 
-  return {
-    calendar: new URL(calendarLink, startUrl).toString(),
-    cinema: new URL(cinemaLink, startUrl).toString(),
-    restaurant: new URL(restaurantLink, startUrl).toString()
+    // Construct full URLs using the starting URL as the base
+    return {
+      calendar: new URL(calendarLink, startUrl).toString(),
+      cinema: new URL(cinemaLink, startUrl).toString(),
+      restaurant: new URL(restaurantLink, startUrl).toString()
+    }
+  } catch (error) {
+    console.error('Error scraping links:', error.message)
+    throw error
   }
 }

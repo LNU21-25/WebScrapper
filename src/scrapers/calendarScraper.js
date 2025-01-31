@@ -7,12 +7,24 @@ import cheerio from 'cheerio'
  * @returns {string[]} - Array of days when all three are available.
  */
 export async function scrapeCalendar (calendarUrl) {
-  const response = await axios.get(calendarUrl)
-  const $ = cheerio.load(response.data)
+  try {
+    // Fetch the HTML content of the calendar page
+    const response = await axios.get(calendarUrl)
+    const $ = cheerio.load(response.data)
 
-  // Logic to determine common available days
-  // (Example: Check for days marked as "available" for all three friends)
-  const availableDays = ['Friday', 'Saturday', 'Sunday'] // Placeholder
+    // Extract availability for each friend
+    const peterAvailability = $('div#peter .day:contains("Available")').map((i, el) => $(el).text().trim()).get()
+    const paulAvailability = $('div#paul .day:contains("Available")').map((i, el) => $(el).text().trim()).get()
+    const maryAvailability = $('div#mary .day:contains("Available")').map((i, el) => $(el).text().trim()).get()
 
-  return availableDays
+    // Find common available days
+    const availableDays = peterAvailability.filter(day =>
+      paulAvailability.includes(day) && maryAvailability.includes(day)
+    )
+
+    return availableDays
+  } catch (error) {
+    console.error('Error scraping calendar:', error.message)
+    throw error
+  }
 }

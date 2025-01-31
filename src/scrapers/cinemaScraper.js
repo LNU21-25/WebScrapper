@@ -1,4 +1,5 @@
 import axios from 'axios'
+import cheerio from 'cheerio'
 
 /**
  * Scrapes movie showtimes for the available days.
@@ -7,9 +8,28 @@ import axios from 'axios'
  * @returns {object} - Movie showtimes for the available days.
  */
 export async function scrapeCinema (cinemaUrl, availableDays) {
-  const response = await axios.get(cinemaUrl)
-  const showtimes = {} // Placeholder for parsed showtimes
+  try {
+    // Fetch the HTML content of the cinema page
+    const response = await axios.get(cinemaUrl)
+    const $ = cheerio.load(response.data)
 
-  // Logic to parse showtimes for available days
-  return showtimes
+    const showtimes = {}
+
+    // Loop through available days and extract showtimes
+    availableDays.forEach(day => {
+      const dayShowtimes = $(`div#${day.toLowerCase()} .showtime`).map((i, el) => {
+        const movie = $(el).find('.movie').text().trim()
+        const time = $(el).find('.time').text().trim()
+        const isBooked = $(el).hasClass('booked')
+        return { movie, time, isBooked }
+      }).get()
+
+      showtimes[day] = dayShowtimes.filter(showtime => !showtime.isBooked)
+    })
+
+    return showtimes
+  } catch (error) {
+    console.error('Error scraping cinema:', error.message)
+    throw error
+  }
 }
