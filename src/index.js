@@ -1,8 +1,8 @@
-import { scrapeLinks } from './scrapers/linkScraper.js'
-import { scrapeCalendar } from './scrapers/calendarScraper.js'
-import { scrapeCinema } from './scrapers/cinemaScraper.js'
-import { scrapeRestaurant } from './scrapers/restaurantScraper.js'
-import { analyzeAndRecommend } from './utils/analysisUtils.js'
+import { scrapeLinks } from './scrapers/linkScraper.mjs'
+import { scrapeCalendar } from './scrapers/calendarScraper.mjs'
+import { scrapeCinema } from './scrapers/cinemaScraper.mjs'
+import { scrapeRestaurant } from './scrapers/restaurantScraper.mjs'
+import { analyzeAndRecommend } from './utils/analysisUtils.mjs'
 
 /**
  * Main entry point for the application.

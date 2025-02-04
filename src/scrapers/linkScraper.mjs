@@ -1,5 +1,5 @@
 import axios from 'axios'
-import cheerio from 'cheerio'
+import * as cheerio from 'cheerio'
 
 /**
  * Scrapes links to the calendar, cinema, and restaurant pages.
@@ -14,8 +14,11 @@ export async function scrapeLinks (startUrl) {
 
     // Extract links using cheerio
     const calendarLink = $('a[href*="calendar"]').attr('href')
+    console.log('calendarLink:', calendarLink)
     const cinemaLink = $('a[href*="cinema"]').attr('href')
+    console.log('cinemaLink:', cinemaLink)
     const restaurantLink = $('a[href*="restaurant"]').attr('href')
+    console.log('restaurantLink:', restaurantLink)
 
     // Construct full URLs using the starting URL as the base
     return {
