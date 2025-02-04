@@ -1,7 +1,7 @@
-import { scrapeLinks } from './scraper/linkScraper.js'
-import { scrapeCalendar } from './scraper/calendarScraper.js'
-import { scrapeCinema } from './scraper/cinemaScraper.js'
-import { scrapeRestaurant } from './scraper/restaurantScraper.js'
+import { scrapeLinks } from './scrapers/linkScraper.js'
+import { scrapeCalendar } from './scrapers/calendarScraper.js'
+import { scrapeCinema } from './scrapers/cinemaScraper.js'
+import { scrapeRestaurant } from './scrapers/restaurantScraper.js'
 import { analyzeAndRecommend } from './utils/analyzeUtils.js'
 
 /**
