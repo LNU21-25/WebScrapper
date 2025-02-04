@@ -10,18 +10,21 @@ import { wrapper } from 'axios-cookiejar-support'
  * @returns {object} - Available booking times.
  */
 export async function scrapeRestaurant (restaurantUrl, availableDays) {
+  console.log('restaurantUrl:', restaurantUrl)
   try {
     const jar = new CookieJar()
     const client = wrapper(axios.create({ jar }))
 
     // Log in to the restaurant website
+    console.log('Logging into the restaurant website...')
     await client.post(`${restaurantUrl}/login`, {
       username: 'zeke',
       password: 'coys'
     })
 
     // Fetch the bookings page
-    const response = await client.get(`${restaurantUrl}/bookings`)
+    console.log('Fetching bookings...')
+    const response = await client.get(`${restaurantUrl}login/booking`)
     const $ = cheerio.load(response.data)
 
     const bookings = {}

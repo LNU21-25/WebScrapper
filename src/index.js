@@ -11,19 +11,19 @@ import { analyzeAndRecommend } from './utils/analysisUtils.mjs'
 async function main (startUrl) {
   console.log('Scraping links...')
   const links = await scrapeLinks(startUrl)
-  console.log('Scraping links...OK')
+  console.log('Scraping links...OK\n')
 
   console.log('Scraping available days...')
   const availableDays = await scrapeCalendar(links.calendar)
-  console.log('Scraping available days...OK')
+  console.log('Scraping available days...OK\n')
 
   console.log('Scraping showtimes...')
   const showtimes = await scrapeCinema(links.cinema, availableDays)
-  console.log('Scraping showtimes...OK')
+  console.log('Scraping showtimes...OK\n')
 
   console.log('Scraping possible reservations...')
   const reservations = await scrapeRestaurant(links.restaurant, availableDays)
-  console.log('Scraping possible reservations...OK')
+  console.log('Scraping possible reservations...OK\n')
 
   console.log('\nRecommendations')
   console.log('===============')

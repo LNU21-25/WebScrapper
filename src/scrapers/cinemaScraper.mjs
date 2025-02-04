@@ -8,6 +8,7 @@ import * as cheerio from 'cheerio'
  * @returns {object} - Movie showtimes for the available days.
  */
 export async function scrapeCinema (cinemaUrl, availableDays) {
+  console.log('cinemaUrl:', cinemaUrl)
   try {
     // Fetch the HTML content of the cinema page
     const response = await axios.get(cinemaUrl)
