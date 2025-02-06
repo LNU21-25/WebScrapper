@@ -7,28 +7,34 @@ import { ensureTrailingSlash } from '../utils/linkUtils.mjs'
  * @param {string} startUrl - The starting URL.
  * @returns {object} - Links to the calendar, cinema, and restaurant pages.
  */
-export async function scrapeLinks (startUrl) {
+export async function scrapeLinks(startUrl) {
   try {
+    console.log('Starting link scraping at:', startUrl);
+
     // Fetch the HTML content of the starting page
-    const response = await axios.get(startUrl)
-    const $ = cheerio.load(response.data)
+    const response = await axios.get(startUrl);
+    const $ = cheerio.load(response.data);
+    console.log('Fetched HTML successfully.');
 
     // Extract links using cheerio
-    const calendarLink = ensureTrailingSlash($('a[href*="calendar"]').attr('href'))
-    console.log('calendarLink:', calendarLink)
-    const cinemaLink = ensureTrailingSlash($('a[href*="cinema"]').attr('href'))
-    console.log('cinemaLink:', cinemaLink)
-    const restaurantLink = ensureTrailingSlash($('a[href*="dinner"]').attr('href'))
-    console.log('restaurantLink:', restaurantLink)
+    let calendarLink = $('a[href*="calendar"]').attr('href');
+    let cinemaLink = $('a[href*="cinema"]').attr('href');
+    let restaurantLink = $('a[href*="dinner"]').attr('href');
 
-    // Construct full URLs using the starting URL as the base
-    return {
-      calendar: new URL(calendarLink, startUrl).toString(),
-      cinema: new URL(cinemaLink, startUrl).toString(),
-      restaurant: new URL(restaurantLink, startUrl).toString()
+    if (!calendarLink || !cinemaLink || !restaurantLink) {
+      throw new Error('One or more required links are missing on the page.');
     }
+
+    // Ensure proper formatting and resolve relative URLs
+    calendarLink = new URL(ensureTrailingSlash(calendarLink), startUrl).toString();
+    cinemaLink = new URL(ensureTrailingSlash(cinemaLink), startUrl).toString();
+    restaurantLink = new URL(ensureTrailingSlash(restaurantLink), startUrl).toString();
+
+    console.log('extracted links:', { calendarLink, cinemaLink, restaurantLink });
+
+    return { calendar: calendarLink, cinema: cinemaLink, restaurant: restaurantLink };
   } catch (error) {
-    console.error('Error scraping links:', error.message)
-    throw error
+    console.error('Error scraping links:', error.message);
+    throw error;
   }
 }
