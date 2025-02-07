@@ -66,7 +66,6 @@ async function getAvailableTimes(cinemaUrl, day, movie) {
   try {
     console.log('fetching times for:', day.text, movie.text);
 
-
     // Use axios to post form data
     const response = await axios.get(`${cinemaUrl}/check?day=${day.value}&movie=${movie.value}`);
 
