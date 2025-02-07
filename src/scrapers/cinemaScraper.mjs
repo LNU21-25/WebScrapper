@@ -46,9 +46,11 @@ export async function scrapeCinema(cinemaUrl) {
         allCombinations.push(fullInfo);
       }
     }
-
-    console.log('All Combinations:', allCombinations);
-    return allCombinations;
+    const combinations = allCombinations.map(dayGroup =>
+      dayGroup.map(({ status, ...rest }) => rest)
+    );
+    console.log('All Combinations:', combinations);
+    return combinations;
   } catch (error) {
     console.error('Error scraping cinema:', error.message);
     throw error;
@@ -64,8 +66,6 @@ export async function scrapeCinema(cinemaUrl) {
  */
 async function getAvailableTimes(cinemaUrl, day, movie) {
   try {
-    console.log('fetching times for:', day.text, movie.text);
-
     // Use axios to post form data
     const response = await axios.get(`${cinemaUrl}/check?day=${day.value}&movie=${movie.value}`);
 
