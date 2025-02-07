@@ -1,0 +1,1 @@
+clone, cd in, npm install, npm start <starting link>
