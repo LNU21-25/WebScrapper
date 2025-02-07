@@ -1,48 +1,43 @@
-/**
- * Analyzes scraped data and generates recommendations.
- * @param {string[]} availableDays - Array of available days.
- * @param {Object} showtimes - Movie showtimes for available days.
- * @param {Object} bookings - Restaurant bookings for available days.
- */
 export function analyzeAndRecommend(availableDays, showtimes, bookings) {
-  // If no available days, notify the user and exit
-  if (availableDays.length === 0) {
-    console.log('No days are available for all three friends.');
-    return;
+  const recommendations = [];
+
+  // Filter showtimes to only include common available days
+  const filteredShowtimes = showtimes.filter(combo =>
+    combo.every(movie => availableDays.includes(movie.day))
+  );
+
+  // Iterate through each showtime combination
+  for (const combo of filteredShowtimes) {
+    // Skip combinations with multiple movies on different days
+    if (new Set(combo.map(m => m.day)).size > 1) continue;
+
+    const day = combo[0].day;
+
+    // Find movie times in the combination
+    const movieTimes = combo.map(m => m.time);
+    const movieNames = combo.map(m => m.movie);
+
+    // Check for compatible restaurant reservations
+    for (const movieTime of movieTimes) {
+      const movieHour = parseInt(movieTime.split(':')[0]);
+
+      // Find compatible restaurant slots (minimum 2 hours after movie start)
+      const compatibleSlots = bookings[day].filter(slot => {
+        const [start, end] = slot.split('-').map(Number);
+
+        // Check if slot starts at least 2 hours after movie
+        return start >= (movieHour + 2);
+      });
+
+      // If compatible slots exist, create recommendation
+      if (compatibleSlots.length > 0) {
+        const slotToUse = compatibleSlots[0];
+        recommendations.push(
+          `On ${day} the movie "${movieNames[movieTimes.indexOf(movieTime)]}" starts at ${movieTime} and there is a free table between ${slotToUse.replace('-', ':')}.`
+        );
+      }
+    }
   }
 
-  // Loop through each available day
-  availableDays.forEach(day => {
-    const dayShowtimes = showtimes[day] || [];
-    const dayBookings = bookings[day] || [];
-
-    // Loop through each movie showtime for the day
-    dayShowtimes.forEach(movie => {
-      const movieTime = parseTime(movie.time);
-
-      // Loop through each restaurant booking for the day
-      dayBookings.forEach(booking => {
-        const bookingTime = parseTime(booking.time);
-
-        // Check if the booking is at least 2 hours after the movie
-        if (bookingTime - movieTime >= 2 * 60 * 60 * 1000) {
-          console.log(
-            `* On ${day} the movie "${movie.movie}" starts at ${movie.time} and there is a free table between ${booking.time}-${booking.time + 2}.`
-          );
-        }
-      });
-    });
-  });
-}
-
-/**
- * Parses a time string (e.g., "18:00") into a timestamp.
- * @param {string} timeStr - The time string to parse.
- * @returns {number} - The timestamp in milliseconds.
- */
-function parseTime(timeStr) {
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  const date = new Date();
-  date.setHours(hours, minutes, 0, 0); // Set time to the specified hours and minutes
-  return date.getTime(); // Return timestamp in milliseconds
+  return recommendations;
 }

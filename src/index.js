@@ -27,7 +27,7 @@ async function main (startUrl) {
 
   console.log('\nRecommendations')
   console.log('===============')
-  analyzeAndRecommend(availableDays, showtimes, reservations)
+  console.log(analyzeAndRecommend(availableDays, showtimes, reservations))
 }
 
 // Get the start URL from command line arguments
