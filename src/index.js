@@ -18,11 +18,11 @@ async function main (startUrl) {
   console.log('Scraping available days...OK\n')
 
   console.log('Scraping showtimes...')
-  const showtimes = await scrapeCinema(links.cinema, availableDays)
+  const showtimes = await scrapeCinema(links.cinema)
   console.log('Scraping showtimes...OK\n')
 
   console.log('Scraping possible reservations...')
-  const reservations = await scrapeRestaurant(links.restaurant, availableDays)
+  const reservations = await scrapeRestaurant(links.restaurant)
   console.log('Scraping possible reservations...OK\n')
 
   console.log('\nRecommendations')
