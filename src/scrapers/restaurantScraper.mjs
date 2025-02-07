@@ -45,7 +45,6 @@ async function login(loginUrl, credentials, client) {
  * @returns {object} - Object mapping day names to arrays of available booking slots
  */
 export async function scrapeRestaurant(restaurantUrl) {
-  console.log('Restaurant URL:', restaurantUrl);
   try {
     // Setup axios with cookie jar support
     const jar = new CookieJar();
@@ -58,7 +57,6 @@ export async function scrapeRestaurant(restaurantUrl) {
     // Find the login form action
     const loginFormAction = $('form').attr('action');
     const loginUrl = new URL(loginFormAction, restaurantUrl).toString();
-    console.log('Login URL:', loginUrl);
 
     // Prepare login credentials
     const credentials = {
@@ -71,7 +69,6 @@ export async function scrapeRestaurant(restaurantUrl) {
 
     // Construct full redirect URL
     const fullRedirectUrl = new URL(redirectUrl, restaurantUrl).toString();
-    console.log('Full Redirect URL:', fullRedirectUrl);
 
     // If there's a redirect URL, follow it
     if (fullRedirectUrl) {
@@ -84,10 +81,8 @@ export async function scrapeRestaurant(restaurantUrl) {
 
     // Construct booking URL and fetch booking page
     const bookingUrl = new URL('login/booking', restaurantUrl).toString();
-    console.log('Booking URL:', bookingUrl);
 
     const bookingResponse = await client.get(bookingUrl);
-    console.log('Booking response status:', bookingResponse.status);
 
     // Load booking page HTML
     const $booking = cheerio.load(bookingResponse.data);
@@ -130,7 +125,6 @@ export async function scrapeRestaurant(restaurantUrl) {
       openReservations[day].push(slot);
     });
 
-    console.log('Open reservations:', openReservations);
     return openReservations;
   } catch (error) {
     console.error('Error scraping restaurant:', error.message);

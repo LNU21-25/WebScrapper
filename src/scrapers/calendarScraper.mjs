@@ -7,31 +7,38 @@ import * as cheerio from 'cheerio'
  * @returns {string[]} - Array of days when all three are available.
  */
 export async function scrapeCalendar(calendarUrl) {
-  console.log('Starting calendar scraping at:', calendarUrl);
   try {
     // Fetch the main calendar page to determine links to individual availability pages
     const response = await axios.get(calendarUrl);
-    console.log('Fetched calendar page successfully.');
-
     const $ = cheerio.load(response.data);
 
-    // Determine the links for each person's availability page
-    const people = ['peter', 'paul', 'mary'];
+    // Dynamically find links that might represent individual availability pages
+    const peopleLinks = $('a')
+      .map((_, el) => $(el).attr('href'))
+      .get()
+      .filter(href => href)
+      .map(href => new URL(href, calendarUrl).toString());
+
     const availabilityData = {};
 
-    for (const person of people) {
-      const personLink = new URL(`${person}.html`, calendarUrl).toString();
-      console.log(`\nFetching availability for ${person} at:`, personLink);
+    for (const personLink of peopleLinks) {
+      try {
+        const availability = await getAvailability(personLink);
 
-      availabilityData[person] = await getAvailability(personLink);
-      console.log(`${person} Availability:`, availabilityData[person]);
+        // Extract a simple identifier from the link (fallback if no better method exists)
+        const personIdentifier = personLink.split('/').pop().split('.')[0];
+
+        availabilityData[personIdentifier] = availability;
+      } catch (error) {
+        console.error(`Error processing link ${personLink}:`, error.message);
+      }
     }
 
     // Find common available days
-    const { peter, paul, mary } = availabilityData;
-    const availableDays = peter.filter(day => paul.includes(day) && mary.includes(day));
-
-    console.log('\nCommon Available Days:', availableDays);
+    const availableDays = Object.values(availabilityData)
+      .reduce((common, current) =>
+        common.filter(day => current.includes(day))
+      );
 
     return availableDays;
   } catch (error) {
@@ -55,14 +62,10 @@ async function getAvailability(personUrl) {
       .map((_, el) => $(el).text().trim())
       .get();
 
-    console.log(`Days found:`, days);
-
     // Extract availability statuses
     const statuses = $('table tbody tr td')
       .map((_, el) => $(el).text().trim().toLowerCase())
       .get();
-
-    console.log(`Statuses found:`, statuses);
 
     if (days.length !== statuses.length) {
       console.warn(`Warning: Days and statuses count mismatch in ${personUrl}`);
@@ -71,7 +74,6 @@ async function getAvailability(personUrl) {
     // Return days where status is "ok" (case-insensitive)
     const availableDays = days.filter((_, i) => statuses[i] === 'ok');
 
-    console.log(`Availability:`, availableDays);
     return availableDays;
   } catch (error) {
     console.error(`Error fetching availability for ${personUrl}:`, error.message);

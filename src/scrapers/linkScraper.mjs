@@ -9,12 +9,9 @@ import { ensureTrailingSlash } from '../utils/linkUtils.mjs'
  */
 export async function scrapeLinks(startUrl) {
   try {
-    console.log('Starting link scraping at:', startUrl);
-
     // Fetch the HTML content of the starting page
     const response = await axios.get(startUrl);
     const $ = cheerio.load(response.data);
-    console.log('Fetched HTML successfully.');
 
     // Extract links using cheerio
     let calendarLink = $('a[href*="calendar"]').attr('href');
@@ -29,8 +26,6 @@ export async function scrapeLinks(startUrl) {
     calendarLink = new URL(ensureTrailingSlash(calendarLink), startUrl).toString();
     cinemaLink = new URL(ensureTrailingSlash(cinemaLink), startUrl).toString();
     restaurantLink = new URL(ensureTrailingSlash(restaurantLink), startUrl).toString();
-
-    console.log('extracted links:', { calendarLink, cinemaLink, restaurantLink });
 
     return { calendar: calendarLink, cinema: cinemaLink, restaurant: restaurantLink };
   } catch (error) {
