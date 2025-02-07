@@ -9,7 +9,6 @@ import { ensureTrailingSlash } from '../utils/linkUtils.mjs'
  */
 export async function scrapeLinks (startUrl) {
   try {
-    // Fetch the HTML content of the starting page
     const response = await axios.get(startUrl)
     const $ = cheerio.load(response.data)
 

@@ -8,11 +8,11 @@ import * as cheerio from 'cheerio'
  */
 export async function scrapeCalendar (calendarUrl) {
   try {
-    // Fetch the main calendar page to determine links to individual availability pages
+    // Fetch calendar page
     const response = await axios.get(calendarUrl)
     const $ = cheerio.load(response.data)
 
-    // Dynamically find links that might represent individual availability pages
+    // find links that represent availability pages
     const peopleLinks = $('a')
       .map((_, el) => $(el).attr('href'))
       .get()
@@ -25,7 +25,6 @@ export async function scrapeCalendar (calendarUrl) {
       try {
         const availability = await getAvailability(personLink)
 
-        // Extract a simple identifier from the link (fallback if no better method exists)
         const personIdentifier = personLink.split('/').pop().split('.')[0]
 
         availabilityData[personIdentifier] = availability
@@ -71,7 +70,7 @@ async function getAvailability (personUrl) {
       console.warn(`Warning: Days and statuses count mismatch in ${personUrl}`)
     }
 
-    // Return days where status is "ok" (case-insensitive)
+    // Return days where status is "ok"
     const availableDays = days.filter((_, i) => statuses[i] === 'ok')
 
     return availableDays

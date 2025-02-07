@@ -8,7 +8,6 @@ import * as cheerio from 'cheerio'
  */
 export async function scrapeCinema (cinemaUrl) {
   try {
-    // Fetch the HTML content of the cinema page
     const response = await axios.get(cinemaUrl)
     const $ = cheerio.load(response.data)
 
@@ -19,8 +18,7 @@ export async function scrapeCinema (cinemaUrl) {
         text: $(el).text().trim()
       }))
       .get()
-      .filter(day => day.value) // Remove disabled/placeholder options
-
+      .filter(day => day.value)
     const movies = $('#movie option')
       .map((i, el) => ({
         value: $(el).attr('value'),

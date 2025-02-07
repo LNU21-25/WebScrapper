@@ -24,10 +24,10 @@ async function login (loginUrl, credentials, client) {
       }
     })
 
-    // Extract redirect URL from location header
+    // Extract redirect URL
     const redirectUrl = response.headers.location
 
-    // Get cookies from the response
+    // Get cookies
     const cookies = response.headers['set-cookie']
 
     return { redirectUrl, cookies }
@@ -44,31 +44,27 @@ async function login (loginUrl, credentials, client) {
  */
 export async function scrapeRestaurant (restaurantUrl) {
   try {
-    // Setup axios with cookie jar support
     const jar = new CookieJar()
     const client = wrapper(axios.create({ jar }))
 
-    // Load the initial page to get the login form details
+    // Load the initial page
     const initialResponse = await client.get(restaurantUrl)
     const $ = cheerio.load(initialResponse.data)
 
-    // Find the login form action
+    // Find the login form
     const loginFormAction = $('form').attr('action')
     const loginUrl = new URL(loginFormAction, restaurantUrl).toString()
-
-    // Prepare login credentials
     const credentials = {
       username: 'zeke',
       password: 'coys'
     }
 
-    // Perform login
+    // login
     const { redirectUrl, cookies } = await login(loginUrl, credentials, client)
 
-    // Construct full redirect URL
+    // redirect URL
     const fullRedirectUrl = new URL(redirectUrl, restaurantUrl).toString()
 
-    // If there's a redirect URL, follow it
     if (fullRedirectUrl) {
       await client.get(fullRedirectUrl, {
         headers: {
@@ -76,16 +72,12 @@ export async function scrapeRestaurant (restaurantUrl) {
         }
       })
     }
-
-    // Construct booking URL and fetch booking page
     const bookingUrl = new URL('login/booking', restaurantUrl).toString()
 
     const bookingResponse = await client.get(bookingUrl)
 
-    // Load booking page HTML
     const $booking = cheerio.load(bookingResponse.data)
 
-    // Mapping of three-letter day abbreviations to full day names
     const dayMapping = {
       fri: 'Friday',
       sat: 'Saturday',
@@ -98,25 +90,19 @@ export async function scrapeRestaurant (restaurantUrl) {
 
     const openReservations = {}
 
-    // Select all radio inputs these represent free booking options
+    // Select all radio inputs
     $booking('input[type="radio"]').each((i, el) => {
-      const value = $booking(el).attr('value') // e.g., "fri1416"
+      const value = $booking(el).attr('value')
       if (!value || value.length < 7) return
-
-      // Ensure the slot is free
       const parentText = $booking(el).parent().text().trim().toLowerCase()
       if (!parentText.includes('free')) return
-
-      // Extract the day abbreviation (first three letters) and map it
+      // Extract the day abbreviation
       const dayAbbrev = value.slice(0, 3).toLowerCase()
       const day = dayMapping[dayAbbrev] || dayAbbrev
-
-      // Extract the start and end times
+      // Extract start and end
       const startTime = value.slice(3, 5)
       const endTime = value.slice(5, 7)
       const slot = `${startTime}-${endTime}`
-
-      // Add the slot to the day in our openReservations object
       if (!openReservations[day]) {
         openReservations[day] = []
       }
